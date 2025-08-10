@@ -1,7 +1,10 @@
+import random
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
 import json
 from datetime import datetime
+
+from voxel import Voxel
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -88,4 +91,10 @@ def handle_gravity_toggle():
 
 if __name__ == '__main__':
     print("Starting multiplayer server on http://localhost:5000")
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    for z in range(20):
+        for x in range(20):
+            # voxel = Voxel(position=(x, 0, z))
+            voxel = {"position":(x, 0, z), "color":random.choice(["red","blue","green"])}
+            game_state["voxels"].append(voxel)
+
+    socketio.run(app, host='0.0.0.0', port=5001, debug=True)

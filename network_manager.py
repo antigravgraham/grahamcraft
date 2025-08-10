@@ -5,7 +5,7 @@ from voxel import Voxel
 from multiplayer_player import MultiplayerPlayer
 
 class NetworkManager:
-    def __init__(self, server_url="http://localhost:5000"):
+    def __init__(self, server_url="http://192.168.1.243:5001"):
         self.sio = socketio.Client()
         self.server_url = server_url
         self.connected = False
@@ -30,7 +30,8 @@ class NetworkManager:
         
         @self.sio.event
         def game_state(data):
-            print("Received initial game state")
+            print("Received initial game state:")
+            print(data)
             self.load_game_state(data)
         
         @self.sio.event

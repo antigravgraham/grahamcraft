@@ -80,10 +80,10 @@ def main():
     
     if not connected:
         print("Failed to connect to multiplayer server. Starting in offline mode.")
-        for z in range(20):
-            for x in range(20):
-                voxel = Voxel(position=(x, 0, z))
-                voxels.append(voxel)
+        # for z in range(20):
+        #     for x in range(20):
+        #         voxel = Voxel(position=(x, 0, z))
+        #         voxels.append(voxel)
 
     character = Character(position=(10, 1, 10))
     app.run()
