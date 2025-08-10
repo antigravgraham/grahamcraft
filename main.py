@@ -20,25 +20,14 @@ application.blender_paths["default"] = (
 )
 
 
-
 player = ArrowKeyController(gravity=1)
 player.cursor.scale = 0.00025
 app.has_gravity = True
 
 
-
-
 voxels = []
 
 
-
-
-for z in range(20):
-    for x in range(20):
-        voxel = Voxel(position=(x, 0, z))
-        voxels.append(voxel)
-
-character = Character(position=(10, 1, 10))
 
 
 def input(key):
@@ -74,4 +63,16 @@ def input(key):
         load_world(voxels, player, app)
 
 
-app.run()
+def main():
+    for z in range(20):
+        for x in range(20):
+            voxel = Voxel(position=(x, 0, z))
+            voxels.append(voxel)
+
+    character = Character(position=(10, 1, 10))
+    app.run()
+
+
+
+if __name__ == "__main__":
+    main()
