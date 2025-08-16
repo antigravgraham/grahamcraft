@@ -1,119 +1,94 @@
-from ursina import scene, raycast, camera, mouse, destroy, color, Button, Ursina, held_keys, time, Entity, application
-from ursina.prefabs.first_person_controller import FirstPersonController
-import random
-import pickle
-import os
+from ursina import (
+    scene,
+    raycast,
+    camera,
+    mouse,
+    destroy,
+    color,
+    Ursina,
+    application,
+)
+from arrow_key_controller import ArrowKeyController
+from voxel import Voxel
+from character import Character
+from world_manager import save_world, load_world
+from network_manager import NetworkManager
 
 app = Ursina()
 
-application.blender_paths['default'] = '/Applications/Blender.app/Contents/MacOS/Blender'
+application.blender_paths["default"] = (
+    "/Applications/Blender.app/Contents/MacOS/Blender"
+)
 
-class ArrowKeyController(FirstPersonController):
-    def update(self):
-        speed = self.speed * time.dt
-        if held_keys['up arrow']:
-            self.position += self.forward * speed
-        if held_keys['down arrow']:
-            self.position -= self.forward * speed
-        if held_keys['left arrow']:
-            self.position -= self.right * speed
-        if held_keys['right arrow']:
-            self.position += self.right * speed
-        super().update()
 
-player = ArrowKeyController(gravity=1)
-player.cursor.scale = 0.00025  
+network_manager = NetworkManager()
+player = ArrowKeyController(gravity=1, network_manager=network_manager)
+player.cursor.scale = 0.00025
 app.has_gravity = True
-
-
-# mymodel=Entity(model="character.obj",scale=0.1, texture=("Grass.png"))
-my_model = Entity(model='character.blend')
-
-class Voxel(Button):
-    def __init__(self, position=(0,0,0)):
-        super().__init__(parent=scene,
-            position=position,
-            model='cube',
-            origin_y=.5,
-            texture='white_cube',
-            # color=color.hsv(0, 0, random.uniform(.9, 1.0)),
-            color=color.random_color(),
-            highlight_color=color.lime,
-        )
 
 voxels = []
 
-def save_world(filename='world.pkl'):
-    world_data = {
-        'voxel_positions': [voxel.position for voxel in voxels],
-        'voxel_colors': [voxel.color for voxel in voxels],
-        'player_position': player.position,
-        'has_gravity': app.has_gravity
-    }
-    with open(filename, 'wb') as f:
-        pickle.dump(world_data, f)
-    print(f"World saved to {filename}")
 
-def load_world(filename='world.pkl'):
-    if not os.path.exists(filename):
-        print(f"Save file {filename} not found")
-        return
-    
-    for voxel in voxels[:]:
-        destroy(voxel)
-    voxels.clear()
-    
-    with open(filename, 'rb') as f:
-        world_data = pickle.load(f)
-    
-    for pos, col in zip(world_data['voxel_positions'], world_data['voxel_colors']):
-        voxel = Voxel(position=pos)
-        voxel.color = col
-        voxels.append(voxel)
-    
-    player.position = world_data['player_position']
-    app.has_gravity = world_data['has_gravity']
-    player.gravity = 1 if app.has_gravity else 0
-    
-    print(f"World loaded from {filename}")
 
-for z in range(20):
-    for x in range(20):
-        voxel = Voxel(position=(x,0,z))
-        voxels.append(voxel)
 
 def input(key):
-    if key == 'left mouse down':
+    if key == "left mouse down":
         hit_info = raycast(camera.world_position, camera.forward, distance=5)
         if hit_info.hit:
-            new_voxel = Voxel(position=hit_info.entity.position + hit_info.normal)
+            new_position = hit_info.entity.position + hit_info.normal
+            new_voxel = Voxel(position=new_position)
             voxels.append(new_voxel)
-    if key == 'right mouse down' and mouse.hovered_entity:
+            network_manager.send_voxel_place(new_position, new_voxel.color)
+    if key == "right mouse down" and mouse.hovered_entity:
         if mouse.hovered_entity in voxels:
+            position = mouse.hovered_entity.position
             voxels.remove(mouse.hovered_entity)
+            network_manager.send_voxel_destroy(position)
         destroy(mouse.hovered_entity)
-    if key == 'escape':
+    if key == "escape":
+        network_manager.disconnect_from_server()
         quit()
-    if key == 'r':
-        (x,y,z) = player.position
-        player.position = (x,y + 0.55 ,z)
-    if key == 'f':
-        (x,y,z) = player.position
-        player.position = (x,y - 0.55 ,z)
+    if key == "r":
+        (x, y, z) = player.position
+        player.position = (x, y + 0.55, z)
+        network_manager.send_player_move(player.position)
+    if key == "f":
+        (x, y, z) = player.position
+        player.position = (x, y - 0.55, z)
+        network_manager.send_player_move(player.position)
 
-    if key == 'g':
-        app.has_gravity = not app.has_gravity
-        if app.has_gravity:
-            player.gravity = 1
+    if key == "g":
+        network_manager.send_gravity_toggle()
+
+    if key == "k":
+        if network_manager.connected:
+            network_manager.send_world_save("multiplayer_world.json")
         else:
-            player.gravity = 0
+            save_world(voxels, player, app)
+
+    if key == "l":
+        if network_manager.connected:
+            network_manager.send_world_load("multiplayer_world.json")
+        else:
+            load_world(voxels, player, app)
+
+
+def main():
+    network_manager.set_game_objects(app, player, voxels)
     
-    if key == 'k':
-        save_world()
+    connected = network_manager.connect_to_server()
     
-    if key == 'l':
-        load_world()
+    if not connected:
+        print("Failed to connect to multiplayer server. Starting in offline mode.")
+        # for z in range(20):
+        #     for x in range(20):
+        #         voxel = Voxel(position=(x, 0, z))
+        #         voxels.append(voxel)
 
-app.run()
+    character = Character(position=(10, 1, 10))
+    app.run()
 
 
+
+if __name__ == "__main__":
+    main()
