@@ -71,7 +71,6 @@ class NetworkManager:
                 if tuple(voxel.position) == position:
                     self.voxels.remove(voxel)
                     destroy(voxel)
-                    break
         
         @self.sio.event
         def world_loaded(data):

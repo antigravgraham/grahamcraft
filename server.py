@@ -1,4 +1,6 @@
 import random
+import signal
+import sys
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
 import json
@@ -10,6 +12,11 @@ app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 game_state = {"players": {}, "voxels": [], "world_settings": {"has_gravity": True}}
+
+
+def signal_handler(sig, frame):
+    print('\nShutting down server gracefully...')
+    sys.exit(0)
 
 
 @socketio.on("connect")
@@ -112,6 +119,9 @@ def handle_gravity_toggle():
 
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
     print("Starting multiplayer server on http://localhost:5000")
     for z in range(20):
         for x in range(20):

@@ -12,7 +12,7 @@ def install_dependencies():
 def start_server():
     """Start the multiplayer server"""
     print("Starting multiplayer server...")
-    os.system("python server.py")
+    subprocess.run([sys.executable, "server.py"])
 
 if __name__ == "__main__":
     try:
