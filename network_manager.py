@@ -56,8 +56,6 @@ class NetworkManager:
         
         @self.sio.event
         def voxel_placed(data):
-            print("voxel placed:")
-            print(data)
             position = tuple(data["position"])
             color = data["color"]
             voxel = Voxel(position=position)
@@ -136,10 +134,12 @@ class NetworkManager:
             position = tuple(voxel_data["position"])
             color = voxel_data["color"]
             voxel = Voxel(position=position)
-            if isinstance(color, list) and len(color) >= 3:
-                voxel.color = tuple(color[:3])
-            elif hasattr(color, '__iter__') and not isinstance(color, str):
-                voxel.color = color
+            voxel.color = Color(color[0],color[1],color[2],1)
+            self.voxels.append(voxel)
+            # if isinstance(color, list) and len(color) >= 3:
+            #     voxel.color = tuple(color[:3])
+            # elif hasattr(color, '__iter__') and not isinstance(color, str):
+            #     voxel.color = color
             self.voxels.append(voxel)
         
         for player_id, player_data in game_state.get("players", {}).items():
