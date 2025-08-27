@@ -1,6 +1,7 @@
 import socketio
 import threading
-from ursina import destroy
+from typing import Union, Tuple, Any
+from ursina import destroy, Vec3, Color
 from voxel import Voxel
 from multiplayer_player import MultiplayerPlayer
 
@@ -55,13 +56,12 @@ class NetworkManager:
         
         @self.sio.event
         def voxel_placed(data):
+            print("voxel placed:")
+            print(data)
             position = tuple(data["position"])
             color = data["color"]
             voxel = Voxel(position=position)
-            if isinstance(color, list) and len(color) >= 3:
-                voxel.color = tuple(color[:3])
-            elif hasattr(color, '__iter__') and not isinstance(color, str):
-                voxel.color = color
+            voxel.color = Color(color[0],color[1],color[2],1)
             self.voxels.append(voxel)
         
         @self.sio.event
@@ -100,12 +100,11 @@ class NetworkManager:
         if self.connected:
             self.sio.emit('player_move', {"position": list(position)})
     
-    def send_voxel_place(self, position, color):
+    def send_voxel_place(self, position: Tuple[float, float, float], color: Color) -> None:
         if self.connected:
-            color_list = list(color) if hasattr(color, '__iter__') and not isinstance(color, str) else [color.r, color.g, color.b] if hasattr(color, 'r') else [1, 1, 1]
             self.sio.emit('voxel_place', {
                 "position": list(position),
-                "color": color_list
+                "color": [color.r, color.g, color.b]
             })
     
     def send_voxel_destroy(self, position):
