@@ -1,9 +1,11 @@
 import random
+import signal
+import sys
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
 import json
 from datetime import datetime
-
+from ursina import color
 from voxel import Voxel
 
 app = Flask(__name__)
@@ -12,12 +14,18 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 game_state = {"players": {}, "voxels": [], "world_settings": {"has_gravity": True}}
 
 
+def signal_handler(sig, frame):
+    print('\nShutting down server gracefully...')
+    sys.exit(0)
+
+
 @socketio.on("connect")
 def handle_connect():
     print(f"Client connected: {request.sid}")
 
     player_id = request.sid
-    game_state["players"][player_id] = {"position": [10, 1, 10], "color": "red"}
+    # game_state["players"][player_id] = {"position": [10, 1, 10], "color": "red"}
+    game_state["players"][player_id] = {"position": [10, 1, 10], "color": [128,0,0,1]}
 
     emit("game_state", game_state)
     emit(
@@ -112,13 +120,18 @@ def handle_gravity_toggle():
 
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
     print("Starting multiplayer server on http://localhost:5000")
     for z in range(20):
         for x in range(20):
             # voxel = Voxel(position=(x, 0, z))
+            rcolor = color.random_color()
+
             voxel = {
                 "position": (x, 0, z),
-                "color": random.choice(["red", "blue", "green"]),
+                "color": [ rcolor.r, rcolor.g, rcolor.b, rcolor.brightness],
             }
             game_state["voxels"].append(voxel)
 

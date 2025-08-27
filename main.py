@@ -38,7 +38,7 @@ def input(key):
             new_position = hit_info.entity.position + hit_info.normal
             new_voxel = Voxel(position=new_position)
             voxels.append(new_voxel)
-            network_manager.send_voxel_place(new_position, new_voxel.color)
+            network_manager.send_voxel_place((new_position.x, new_position.y, new_position.z), new_voxel.color)
     if key == "right mouse down" and mouse.hovered_entity:
         if mouse.hovered_entity in voxels:
             position = mouse.hovered_entity.position
