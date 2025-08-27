@@ -66,9 +66,14 @@ class NetworkManager:
         def voxel_destroyed(data):
             position = tuple(data["position"])
             for voxel in self.voxels[:]:
-                if tuple(voxel.position) == position:
+                try:
+                    if tuple(voxel.position) == position:
+                        self.voxels.remove(voxel)
+                        destroy(voxel)
+                        break
+                except:
+                    # Voxel already destroyed, remove from list
                     self.voxels.remove(voxel)
-                    destroy(voxel)
         
         @self.sio.event
         def world_loaded(data):
