@@ -147,7 +147,6 @@ class NetworkManager:
             voxel = Voxel(position=position)
             voxel.color = Color(color[0],color[1],color[2],1)
             self.voxels.append(voxel)
-            self.voxels.append(voxel)
         
         for player_id, player_data in game_state.get("players", {}).items():
             if player_id != self.player_id:

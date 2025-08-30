@@ -205,8 +205,8 @@ class TestNetworkManager(unittest.TestCase):
         mock_destroy.assert_any_call(existing_voxel)
         mock_destroy.assert_any_call(existing_player)
         
-        # Check voxels were created (note: there's a bug in the original code that duplicates voxels)
-        self.assertEqual(mock_voxel.call_count, 4)  # Due to duplicate append
+        # Check voxels were created (2 voxels in game state)
+        self.assertEqual(mock_voxel.call_count, 2)  # One call per voxel data
         
         # Check remote player was added (but not current player)
         mock_multiplayer_player.assert_called_once_with(position=(10, 10, 10), player_id="remote_player")
