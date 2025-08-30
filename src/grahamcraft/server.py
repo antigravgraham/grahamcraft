@@ -1,21 +1,23 @@
 # import random
-import signal
-import sys
-from typing import Any, Dict, List
-from flask import Flask, request
-from flask_socketio import SocketIO, emit
 import json
-from datetime import datetime
-from ursina import color, Vec3
+
 # from voxel import Voxel
 import logging
+import signal
+import sys
+from datetime import datetime
+from typing import Any, Dict, List
+
+from flask import Flask, request
+from flask_socketio import SocketIO, emit
+from ursina import Vec3, color
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 # Basic configuration (sets up a StreamHandler to console by default)
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # Get a logger instance
 logger: logging.Logger = logging.getLogger(__name__)
@@ -24,7 +26,7 @@ game_state: Dict[str, Any] = {"players": {}, "voxels": [], "world_settings": {"h
 
 
 def signal_handler(sig: int, frame: Any) -> None:
-    print('\nShutting down server gracefully...')
+    print("\nShutting down server gracefully...")
     sys.exit(0)
 
 
@@ -34,7 +36,7 @@ def handle_connect() -> None:
 
     player_id = request.sid
     # game_state["players"][player_id] = {"position": [10, 1, 10], "color": "red"}
-    game_state["players"][player_id] = {"position": [10, 1, 10], "color": [128,0,0,1]}
+    game_state["players"][player_id] = {"position": [10, 1, 10], "color": [128, 0, 0, 1]}
 
     emit("game_state", game_state)
     emit(
@@ -81,9 +83,7 @@ def handle_voxel_place(data: Dict[str, Any]) -> None:
 @socketio.on("voxel_destroy")
 def handle_voxel_destroy(data: Dict[str, Any]) -> None:
     position = Vec3(tuple(data["position"]))
-    game_state["voxels"] = [
-        v for v in game_state["voxels"] if v["position"] != position
-    ]
+    game_state["voxels"] = [v for v in game_state["voxels"] if v["position"] != position]
     emit("voxel_destroyed", {"position": list(tuple(position))}, broadcast=True)
     logger.info(f"voxel destroyed")
 
@@ -106,9 +106,7 @@ def handle_world_load(data: Dict[str, Any]) -> None:
         with open(filename, "r") as f:
             loaded_state = json.load(f)
             game_state["voxels"] = loaded_state.get("voxels", [])
-            game_state["world_settings"] = loaded_state.get(
-                "world_settings", {"has_gravity": True}
-            )
+            game_state["world_settings"] = loaded_state.get("world_settings", {"has_gravity": True})
         emit(
             "world_loaded",
             {"filename": filename, "success": True, "game_state": game_state},
@@ -120,9 +118,7 @@ def handle_world_load(data: Dict[str, Any]) -> None:
 
 @socketio.on("gravity_toggle")
 def handle_gravity_toggle() -> None:
-    game_state["world_settings"]["has_gravity"] = not game_state["world_settings"][
-        "has_gravity"
-    ]
+    game_state["world_settings"]["has_gravity"] = not game_state["world_settings"]["has_gravity"]
     emit(
         "gravity_changed",
         {"has_gravity": game_state["world_settings"]["has_gravity"]},
@@ -134,7 +130,7 @@ def main() -> None:
     """Main entry point for the server"""
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    
+
     print("Starting multiplayer server on http://localhost:5000")
     for z in range(20):
         for x in range(20):
@@ -143,12 +139,12 @@ def main() -> None:
 
             voxel = {
                 "position": (x, 0, z),
-                "color": [ rcolor.r, rcolor.g, rcolor.b, rcolor.brightness],
+                "color": [rcolor.r, rcolor.g, rcolor.b, rcolor.brightness],
             }
             game_state["voxels"].append(voxel)
 
     socketio.run(app, host="0.0.0.0", port=5001, debug=True, allow_unsafe_werkzeug=True)
 
+
 if __name__ == "__main__":
     main()
-

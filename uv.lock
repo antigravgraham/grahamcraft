@@ -242,7 +242,9 @@ name = "grahamcraft"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "black" },
     { name = "flask-socketio" },
+    { name = "isort" },
     { name = "python-socketio", extra = ["client"] },
     { name = "ursina" },
 ]
@@ -265,9 +267,11 @@ test = [
 
 [package.metadata]
 requires-dist = [
+    { name = "black", specifier = ">=25.1.0" },
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0.0" },
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=6.0.0" },
     { name = "flask-socketio", specifier = ">=5.3.6" },
+    { name = "isort", specifier = ">=6.0.1" },
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.12.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },

@@ -1,4 +1,5 @@
-from typing import Optional, Any
+from typing import Any, Optional
+
 from ursina import held_keys, time
 from ursina.prefabs.first_person_controller import FirstPersonController
 
@@ -8,11 +9,11 @@ class ArrowKeyController(FirstPersonController):
         super().__init__(**kwargs)
         self.network_manager: Optional[Any] = network_manager
         self.last_position: Any = self.position
-    
+
     def update(self) -> None:
         speed = self.speed * time.dt
         moved = False
-        
+
         if held_keys["up arrow"]:
             self.position += self.forward * speed
             moved = True
@@ -25,12 +26,14 @@ class ArrowKeyController(FirstPersonController):
         if held_keys["right arrow"]:
             self.position += self.right * speed
             moved = True
-        
+
         if moved and self.network_manager and self.network_manager.connected:
-            if abs(self.position.x - self.last_position.x) > 0.01 or \
-               abs(self.position.y - self.last_position.y) > 0.01 or \
-               abs(self.position.z - self.last_position.z) > 0.01:
+            if (
+                abs(self.position.x - self.last_position.x) > 0.01
+                or abs(self.position.y - self.last_position.y) > 0.01
+                or abs(self.position.z - self.last_position.z) > 0.01
+            ):
                 self.network_manager.send_player_move(self.position)
                 self.last_position = self.position
-        
+
         super().update()

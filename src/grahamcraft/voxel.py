@@ -1,5 +1,6 @@
 from typing import Tuple
-from ursina import Button, scene, color
+
+from ursina import Button, color, scene
 
 
 class Voxel(Button):

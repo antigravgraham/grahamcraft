@@ -1,38 +1,48 @@
 """Pytest configuration and shared fixtures for GrahamCraft tests"""
 
-import pytest
-import sys
 import os
-from unittest.mock import Mock, patch, MagicMock
+import sys
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 # Add src to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 
 # Create comprehensive Ursina mocks
 class MockUrsinaApp:
     """Mock Ursina application"""
+
     def __init__(self):
         self.has_gravity = True
-        
+
+
 class MockUrsinaEntity:
     """Mock Ursina Entity that doesn't require initialization"""
+
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
-        if 'position' not in kwargs:
+        if "position" not in kwargs:
             self.position = (0, 0, 0)
+
 
 class MockUrsinaButton(MockUrsinaEntity):
     """Mock Ursina Button"""
+
     pass
+
 
 class MockUrsinaText(MockUrsinaEntity):
     """Mock Ursina Text"""
+
     pass
-    
+
+
 class MockFirstPersonController:
     """Mock FirstPersonController"""
+
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -43,9 +53,10 @@ class MockFirstPersonController:
         self.right = Mock()
         self.cursor = Mock()
         self.cursor.scale = 1.0
-        
+
     def update(self):
         pass
+
 
 @pytest.fixture(autouse=True)
 def mock_ursina_imports():
@@ -58,43 +69,48 @@ def mock_ursina_imports():
     mock_color.red = "red"
     mock_color.blue = "blue"
     mock_color.white = "white"
-    
+
     mock_held_keys = Mock()
     mock_held_keys.__getitem__ = Mock(return_value=False)
-    
+
     mock_time = Mock()
     mock_time.dt = 0.016
-    
+
     mock_vec3 = Mock()
     mock_vec3.return_value = Mock()
-    
-    with patch.dict('sys.modules', {
-        'ursina': mock_ursina,
-        'ursina.scene': mock_scene, 
-        'ursina.color': mock_color,
-        'ursina.Button': MockUrsinaButton,
-        'ursina.Entity': MockUrsinaEntity,
-        'ursina.Text': MockUrsinaText,
-        'ursina.Vec3': mock_vec3,
-        'ursina.Color': Mock,
-        'ursina.held_keys': mock_held_keys,
-        'ursina.time': mock_time,
-        'ursina.destroy': Mock(),
-        'ursina.invoke': Mock(),
-        'ursina.prefabs': Mock(),
-        'ursina.prefabs.first_person_controller': Mock(),
-        'ursina.prefabs.first_person_controller.FirstPersonController': MockFirstPersonController,
-    }):
+
+    with patch.dict(
+        "sys.modules",
+        {
+            "ursina": mock_ursina,
+            "ursina.scene": mock_scene,
+            "ursina.color": mock_color,
+            "ursina.Button": MockUrsinaButton,
+            "ursina.Entity": MockUrsinaEntity,
+            "ursina.Text": MockUrsinaText,
+            "ursina.Vec3": mock_vec3,
+            "ursina.Color": Mock,
+            "ursina.held_keys": mock_held_keys,
+            "ursina.time": mock_time,
+            "ursina.destroy": Mock(),
+            "ursina.invoke": Mock(),
+            "ursina.prefabs": Mock(),
+            "ursina.prefabs.first_person_controller": Mock(),
+            "ursina.prefabs.first_person_controller.FirstPersonController": MockFirstPersonController,
+        },
+    ):
         # Also patch at the ursina module level
-        with patch('ursina.scene', mock_scene), \
-             patch('ursina.color', mock_color), \
-             patch('ursina.Button', MockUrsinaButton), \
-             patch('ursina.Entity', MockUrsinaEntity), \
-             patch('ursina.Text', MockUrsinaText), \
-             patch('ursina.held_keys', mock_held_keys), \
-             patch('ursina.time', mock_time), \
-             patch('ursina.destroy', Mock()), \
-             patch('ursina.invoke', Mock()):
+        with (
+            patch("ursina.scene", mock_scene),
+            patch("ursina.color", mock_color),
+            patch("ursina.Button", MockUrsinaButton),
+            patch("ursina.Entity", MockUrsinaEntity),
+            patch("ursina.Text", MockUrsinaText),
+            patch("ursina.held_keys", mock_held_keys),
+            patch("ursina.time", mock_time),
+            patch("ursina.destroy", Mock()),
+            patch("ursina.invoke", Mock()),
+        ):
             yield
 
 
@@ -102,6 +118,7 @@ def mock_ursina_imports():
 def mock_ursina_app():
     """Provide a mock Ursina app for tests"""
     return MockUrsinaApp()
+
 
 @pytest.fixture
 def mock_network_manager():
@@ -146,15 +163,13 @@ def sample_game_state():
     return {
         "players": {
             "player1": {"position": [1, 2, 3], "color": [1.0, 0.0, 0.0, 1.0]},
-            "player2": {"position": [4, 5, 6], "color": [0.0, 1.0, 0.0, 1.0]}
+            "player2": {"position": [4, 5, 6], "color": [0.0, 1.0, 0.0, 1.0]},
         },
         "voxels": [
             {"position": [0, 0, 0], "color": [1.0, 1.0, 1.0]},
-            {"position": [1, 0, 1], "color": [0.5, 0.5, 0.5]}
+            {"position": [1, 0, 1], "color": [0.5, 0.5, 0.5]},
         ],
-        "world_settings": {
-            "has_gravity": True
-        }
+        "world_settings": {"has_gravity": True},
     }
 
 
@@ -166,11 +181,12 @@ def mock_flask_app():
     mock_app.test_request_context.return_value.__exit__ = Mock()
     return mock_app
 
+
 # Pytest markers for test categories
 pytest_markers = {
     "unit": "Unit tests for individual components",
-    "integration": "Integration tests for component interactions", 
+    "integration": "Integration tests for component interactions",
     "slow": "Tests that take longer to run",
     "network": "Tests involving network operations",
-    "file_io": "Tests involving file operations"
+    "file_io": "Tests involving file operations",
 }

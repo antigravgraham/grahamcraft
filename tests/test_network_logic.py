@@ -12,8 +12,8 @@ class TestNetworkLogic(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
-        with patch('socketio.Client'):
-            with patch('logging.getLogger'):
+        with patch("socketio.Client"):
+            with patch("logging.getLogger"):
                 self.network_manager = NetworkManager("http://test:5000")
 
     def test_init_sets_properties(self):
@@ -26,10 +26,10 @@ class TestNetworkLogic(unittest.TestCase):
 
     def test_init_default_url(self):
         """Test NetworkManager with default URL"""
-        with patch('socketio.Client'):
-            with patch('logging.getLogger'):
+        with patch("socketio.Client"):
+            with patch("logging.getLogger"):
                 nm = NetworkManager()
-        
+
         self.assertEqual(nm.server_url, "http://192.168.1.243:5001")
 
     def test_connect_success(self):
@@ -47,7 +47,7 @@ class TestNetworkLogic(unittest.TestCase):
         """Test failed connection"""
         self.network_manager.sio.connect = Mock(side_effect=Exception("Connection refused"))
 
-        with patch('builtins.print') as mock_print:
+        with patch("builtins.print") as mock_print:
             result = self.network_manager.connect_to_server()
 
         self.assertFalse(result)
@@ -79,7 +79,7 @@ class TestNetworkLogic(unittest.TestCase):
         self.network_manager.send_player_move((1.0, 2.0, 3.0))
 
         self.network_manager.sio.emit.assert_called_once_with(
-            'player_move', {"position": [1.0, 2.0, 3.0]}
+            "player_move", {"position": [1.0, 2.0, 3.0]}
         )
 
     def test_send_player_move_disconnected(self):
@@ -103,11 +103,8 @@ class TestNetworkLogic(unittest.TestCase):
 
         self.network_manager.send_voxel_place((10, 20, 30), mock_color)
 
-        expected_data = {
-            "position": [10, 20, 30],
-            "color": [1.0, 0.5, 0.2]
-        }
-        self.network_manager.sio.emit.assert_called_once_with('voxel_place', expected_data)
+        expected_data = {"position": [10, 20, 30], "color": [1.0, 0.5, 0.2]}
+        self.network_manager.sio.emit.assert_called_once_with("voxel_place", expected_data)
 
     def test_send_voxel_destroy(self):
         """Test sending voxel destroy command"""
@@ -117,7 +114,7 @@ class TestNetworkLogic(unittest.TestCase):
         self.network_manager.send_voxel_destroy([5, 6, 7])
 
         self.network_manager.sio.emit.assert_called_once_with(
-            'voxel_destroy', {"position": [5, 6, 7]}
+            "voxel_destroy", {"position": [5, 6, 7]}
         )
 
     def test_send_world_save(self):
@@ -128,7 +125,7 @@ class TestNetworkLogic(unittest.TestCase):
         self.network_manager.send_world_save("my_world.json")
 
         self.network_manager.sio.emit.assert_called_once_with(
-            'world_save', {"filename": "my_world.json"}
+            "world_save", {"filename": "my_world.json"}
         )
 
     def test_send_world_load(self):
@@ -139,7 +136,7 @@ class TestNetworkLogic(unittest.TestCase):
         self.network_manager.send_world_load("my_world.json")
 
         self.network_manager.sio.emit.assert_called_once_with(
-            'world_load', {"filename": "my_world.json"}
+            "world_load", {"filename": "my_world.json"}
         )
 
     def test_send_gravity_toggle(self):
@@ -149,7 +146,7 @@ class TestNetworkLogic(unittest.TestCase):
 
         self.network_manager.send_gravity_toggle()
 
-        self.network_manager.sio.emit.assert_called_once_with('gravity_toggle')
+        self.network_manager.sio.emit.assert_called_once_with("gravity_toggle")
 
     def test_set_game_objects(self):
         """Test setting game objects"""
@@ -163,7 +160,7 @@ class TestNetworkLogic(unittest.TestCase):
         self.assertEqual(self.network_manager.player, mock_player)
         self.assertEqual(self.network_manager.voxels, mock_voxels)
 
-    @patch('grahamcraft.network_manager.MultiplayerPlayer')
+    @patch("grahamcraft.network_manager.MultiplayerPlayer")
     def test_add_remote_player(self, mock_mp_class):
         """Test adding a remote player"""
         mock_player = Mock()
@@ -180,14 +177,14 @@ class TestNetworkLogic(unittest.TestCase):
         existing_player = Mock()
         self.network_manager.remote_players["existing"] = existing_player
 
-        with patch('grahamcraft.network_manager.MultiplayerPlayer') as mock_mp_class:
+        with patch("grahamcraft.network_manager.MultiplayerPlayer") as mock_mp_class:
             self.network_manager.add_remote_player("existing", {"position": [1, 2, 3]})
 
         # Should not create new player
         mock_mp_class.assert_not_called()
         self.assertEqual(self.network_manager.remote_players["existing"], existing_player)
 
-    @patch('grahamcraft.network_manager.destroy')
+    @patch("grahamcraft.network_manager.destroy")
     def test_remove_remote_player(self, mock_destroy):
         """Test removing a remote player"""
         mock_player = Mock()
@@ -200,11 +197,11 @@ class TestNetworkLogic(unittest.TestCase):
 
     def test_remove_remote_player_not_exists(self):
         """Test removing non-existent remote player"""
-        with patch('grahamcraft.network_manager.destroy') as mock_destroy:
+        with patch("grahamcraft.network_manager.destroy") as mock_destroy:
             self.network_manager.remove_remote_player("nonexistent")
 
         mock_destroy.assert_not_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

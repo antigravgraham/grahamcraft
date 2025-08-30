@@ -1,7 +1,9 @@
-import pickle
 import os
-from typing import List, Any
+import pickle
+from typing import Any, List
+
 from ursina import destroy
+
 from .voxel import Voxel
 
 

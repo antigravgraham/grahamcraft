@@ -8,6 +8,8 @@ dependencies = [
     "ursina>=8.1.1",
     "flask-socketio>=5.3.6",
     "python-socketio[client]>=5.10.0",
+    "black>=25.1.0",
+    "isort>=6.0.1",
 ]
 
 [project.optional-dependencies]
