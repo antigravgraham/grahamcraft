@@ -12,11 +12,17 @@ def install_dependencies():
 def start_server():
     """Start the multiplayer server"""
     print("Starting multiplayer server...")
-    subprocess.run([sys.executable, "server.py"])
+    # Import and run server directly instead of subprocess
+    from . import server
+    server.main()
 
-if __name__ == "__main__":
+def main():
+    """Main entry point for the server launcher"""
     try:
         install_dependencies()
         start_server()
     except KeyboardInterrupt:
         print("\nServer stopped.")
+
+if __name__ == "__main__":
+    main()

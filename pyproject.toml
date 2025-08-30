@@ -1,11 +1,23 @@
 [project]
-name = "gametest"
+name = "grahamcraft"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "A multiplayer voxel-based game built with Ursina engine"
+readme = "README_MULTIPLAYER.md"
 requires-python = ">=3.12"
 dependencies = [
     "ursina>=8.1.1",
     "flask-socketio>=5.3.6",
     "python-socketio[client]>=5.10.0",
 ]
+
+[project.scripts]
+grahamcraft = "grahamcraft.main:main"
+grahamcraft-server = "grahamcraft.start_server:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["grahamcraft"]
+package-dir = {"" = "src"}

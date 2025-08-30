@@ -129,7 +129,8 @@ def handle_gravity_toggle():
     )
 
 
-if __name__ == "__main__":
+def main():
+    """Main entry point for the server"""
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
@@ -146,4 +147,7 @@ if __name__ == "__main__":
             game_state["voxels"].append(voxel)
 
     socketio.run(app, host="0.0.0.0", port=5001, debug=True, allow_unsafe_werkzeug=True)
+
+if __name__ == "__main__":
+    main()
 

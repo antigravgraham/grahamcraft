@@ -8,11 +8,11 @@ from ursina import (
     Ursina,
     application,
 )
-from arrow_key_controller import ArrowKeyController
-from voxel import Voxel
-from character import Character
-from world_manager import save_world, load_world
-from network_manager import NetworkManager
+from .arrow_key_controller import ArrowKeyController
+from .voxel import Voxel
+from .character import Character
+from .world_manager import save_world, load_world
+from .network_manager import NetworkManager
 
 app = Ursina()
 

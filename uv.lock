@@ -136,9 +136,9 @@ wheels = [
 ]
 
 [[package]]
-name = "gametest"
+name = "grahamcraft"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "flask-socketio" },
     { name = "python-socketio", extra = ["client"] },

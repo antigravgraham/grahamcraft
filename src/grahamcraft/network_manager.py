@@ -2,8 +2,8 @@ import socketio
 import threading
 from typing import Union, Tuple, Any
 from ursina import destroy, Vec3, Color
-from voxel import Voxel
-from multiplayer_player import MultiplayerPlayer
+from .voxel import Voxel
+from .multiplayer_player import MultiplayerPlayer
 import logging
 
 class NetworkManager:

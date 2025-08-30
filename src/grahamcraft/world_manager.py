@@ -1,7 +1,7 @@
 import pickle
 import os
 from ursina import destroy
-from voxel import Voxel
+from .voxel import Voxel
 
 
 def save_world(voxels, player, app, filename="world.pkl"):
