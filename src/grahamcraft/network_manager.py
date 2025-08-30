@@ -78,6 +78,7 @@ class NetworkManager:
                     if voxel.position == position:
                         self.voxels.pop(idx)
                         self.logger.info(f"voxel popped: {position}")
+                        destroy(voxel)
                 except Exception as e:
                     self.logger.warning(f"Exception while destroying voxel: {e}")
 
