@@ -1,6 +1,5 @@
 import logging
-import threading
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import socketio
 from ursina import Color, Vec3, destroy
@@ -78,10 +77,9 @@ class NetworkManager:
                 try:
                     if voxel.position == position:
                         self.voxels.pop(idx)
-                        # destroy(voxel)
                         self.logger.info(f"voxel popped: {position}")
-                except:
-                    self.logger.info("already destroyed")
+                except Exception as e:
+                    self.logger.warning(f"Exception while destroying voxel: {e}")
 
         @self.sio.event
         def world_loaded(data: Dict[str, Any]) -> None:

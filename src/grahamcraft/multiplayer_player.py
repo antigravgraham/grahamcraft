@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from ursina import Entity, Text, color, scene
+from ursina import Entity, Text, color, scene, Vec3
 
 
 class MultiplayerPlayer(Entity):
@@ -8,7 +8,7 @@ class MultiplayerPlayer(Entity):
         self, position: Tuple[float, float, float] = (0, 1, 0), player_id: str = ""
     ) -> None:
         super().__init__(
-            parent=scene, position=position, model="cube", color=color.blue, scale=(0.8, 1.8, 0.8)
+            parent=scene, position=Vec3(position), model="cube", color=color.blue, scale=Vec3(0.8, 1.8, 0.8)
         )
         self.player_id: str = player_id
 

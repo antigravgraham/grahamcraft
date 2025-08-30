@@ -85,7 +85,7 @@ def handle_voxel_destroy(data: Dict[str, Any]) -> None:
     position = Vec3(tuple(data["position"]))
     game_state["voxels"] = [v for v in game_state["voxels"] if v["position"] != position]
     emit("voxel_destroyed", {"position": list(tuple(position))}, broadcast=True)
-    logger.info(f"voxel destroyed")
+    logger.info("voxel destroyed")
 
 
 @socketio.on("world_save")
