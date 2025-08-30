@@ -8,7 +8,6 @@ from ursina import (
     raycast,
     Vec3
 )
-from functools import partial
 from random import randint
 from .arrow_key_controller import ArrowKeyController
 from .network_manager import NetworkManager
@@ -20,7 +19,7 @@ class Game:
     def __init__(self):
         self.app = Ursina()
         self.network_manager = NetworkManager()
-        start_pos = Vec3(randint(10, 20), randint(10, 20), randint(10, 20))
+        start_pos = Vec3(randint(10, 19), randint(10, 100), randint(10, 19))
         self.player = ArrowKeyController(initial_position=start_pos, gravity=1, network_manager=self.network_manager)
         self.network_manager.set_position_setter(self.player.set_player_position)
         self.player.cursor.scale = 0.00025
