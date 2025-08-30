@@ -1,3 +1,4 @@
+from typing import List
 from ursina import (
     scene,
     raycast,
@@ -26,12 +27,12 @@ player = ArrowKeyController(gravity=1, network_manager=network_manager)
 player.cursor.scale = 0.00025
 app.has_gravity = True
 
-voxels = []
+voxels: List[Voxel] = []
 
 
 
 
-def input(key):
+def input(key: str) -> None:
     if key == "left mouse down":
         hit_info = raycast(camera.world_position, camera.forward, distance=5)
         if hit_info.hit:
@@ -72,13 +73,13 @@ def input(key):
         else:
             load_world(voxels, player, app)
 
-def create_world():
+def create_world() -> None:
     for z in range(20):
         for x in range(20):
             voxel = Voxel(position=(x, 0, z))
             voxels.append(voxel)
 
-def main():
+def main() -> None:
     network_manager.set_game_objects(app, player, voxels)
     
     connected = network_manager.connect_to_server()

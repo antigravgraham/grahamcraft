@@ -1,10 +1,11 @@
 import pickle
 import os
+from typing import List, Any
 from ursina import destroy
 from .voxel import Voxel
 
 
-def save_world(voxels, player, app, filename="world.pkl"):
+def save_world(voxels: List[Voxel], player: Any, app: Any, filename: str = "world.pkl") -> None:
     world_data = {
         "voxel_positions": [voxel.position for voxel in voxels],
         "voxel_colors": [voxel.color for voxel in voxels],
@@ -16,7 +17,7 @@ def save_world(voxels, player, app, filename="world.pkl"):
     print(f"World saved to {filename}")
 
 
-def load_world(voxels, player, app, filename="world.pkl"):
+def load_world(voxels: List[Voxel], player: Any, app: Any, filename: str = "world.pkl") -> None:
     if not os.path.exists(filename):
         print(f"Save file {filename} not found")
         return

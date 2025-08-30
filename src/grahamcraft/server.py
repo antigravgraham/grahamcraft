@@ -1,6 +1,7 @@
 # import random
 import signal
 import sys
+from typing import Any, Dict, List
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
 import json
@@ -17,18 +18,18 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Get a logger instance
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
-game_state = {"players": {}, "voxels": [], "world_settings": {"has_gravity": True}}
+game_state: Dict[str, Any] = {"players": {}, "voxels": [], "world_settings": {"has_gravity": True}}
 
 
-def signal_handler(sig, frame):
+def signal_handler(sig: int, frame: Any) -> None:
     print('\nShutting down server gracefully...')
     sys.exit(0)
 
 
 @socketio.on("connect")
-def handle_connect():
+def handle_connect() -> None:
     print(f"Client connected: {request.sid}")
 
     player_id = request.sid
@@ -44,7 +45,7 @@ def handle_connect():
 
 
 @socketio.on("disconnect")
-def handle_disconnect():
+def handle_disconnect() -> None:
     print(f"Client disconnected: {request.sid}")
     player_id = request.sid
     if player_id in game_state["players"]:
@@ -53,7 +54,7 @@ def handle_disconnect():
 
 
 @socketio.on("player_move")
-def handle_player_move(data):
+def handle_player_move(data: Dict[str, Any]) -> None:
     player_id = request.sid
     if player_id in game_state["players"]:
         game_state["players"][player_id]["position"] = data["position"]
@@ -66,7 +67,7 @@ def handle_player_move(data):
 
 
 @socketio.on("voxel_place")
-def handle_voxel_place(data):
+def handle_voxel_place(data: Dict[str, Any]) -> None:
     voxel_data = {
         "position": data["position"],
         "color": data["color"],
@@ -78,7 +79,7 @@ def handle_voxel_place(data):
 
 
 @socketio.on("voxel_destroy")
-def handle_voxel_destroy(data):
+def handle_voxel_destroy(data: Dict[str, Any]) -> None:
     position = Vec3(tuple(data["position"]))
     game_state["voxels"] = [
         v for v in game_state["voxels"] if v["position"] != position
@@ -88,7 +89,7 @@ def handle_voxel_destroy(data):
 
 
 @socketio.on("world_save")
-def handle_world_save(data):
+def handle_world_save(data: Dict[str, Any]) -> None:
     filename = data.get("filename", "multiplayer_world.json")
     try:
         with open(filename, "w") as f:
@@ -99,7 +100,7 @@ def handle_world_save(data):
 
 
 @socketio.on("world_load")
-def handle_world_load(data):
+def handle_world_load(data: Dict[str, Any]) -> None:
     filename = data.get("filename", "multiplayer_world.json")
     try:
         with open(filename, "r") as f:
@@ -118,7 +119,7 @@ def handle_world_load(data):
 
 
 @socketio.on("gravity_toggle")
-def handle_gravity_toggle():
+def handle_gravity_toggle() -> None:
     game_state["world_settings"]["has_gravity"] = not game_state["world_settings"][
         "has_gravity"
     ]
@@ -129,7 +130,7 @@ def handle_gravity_toggle():
     )
 
 
-def main():
+def main() -> None:
     """Main entry point for the server"""
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)

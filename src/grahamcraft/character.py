@@ -1,9 +1,10 @@
 import random
+from typing import Tuple, List
 from ursina import Entity, scene, color, invoke
 
 
 class Character(Entity):
-    def __init__(self, position=(0, 1, 0)):
+    def __init__(self, position: Tuple[float, float, float] = (0, 1, 0)) -> None:
         super().__init__(
             parent=scene,
             position=position,
@@ -11,11 +12,11 @@ class Character(Entity):
             color=color.red,
             scale=(0.8, 0.8, 0.8)
         )
-        self.move_timer = 0
+        self.move_timer: float = 0
         invoke(self.random_move, delay=1)
     
-    def random_move(self):
-        directions = [(1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1)]
+    def random_move(self) -> None:
+        directions: List[Tuple[int, int, int]] = [(1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1)]
         direction = random.choice(directions)
         new_x = self.position[0] + direction[0]
         new_z = self.position[2] + direction[2]

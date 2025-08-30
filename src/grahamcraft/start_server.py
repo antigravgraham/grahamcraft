@@ -4,19 +4,19 @@ import subprocess
 import sys
 import os
 
-def install_dependencies():
+def install_dependencies() -> None:
     """Install required dependencies"""
     print("Installing dependencies...")
     subprocess.run([sys.executable, "-m", "pip", "install", "flask-socketio", "python-socketio[client]"])
 
-def start_server():
+def start_server() -> None:
     """Start the multiplayer server"""
     print("Starting multiplayer server...")
     # Import and run server directly instead of subprocess
     from . import server
     server.main()
 
-def main():
+def main() -> None:
     """Main entry point for the server launcher"""
     try:
         install_dependencies()

@@ -1,8 +1,9 @@
+from typing import Tuple
 from ursina import Button, scene, color
 
 
 class Voxel(Button):
-    def __init__(self, position=(0, 0, 0)):
+    def __init__(self, position: Tuple[float, float, float] = (0, 0, 0)) -> None:
         super().__init__(
             parent=scene,
             position=position,

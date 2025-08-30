@@ -1,14 +1,15 @@
+from typing import Optional, Any
 from ursina import held_keys, time
 from ursina.prefabs.first_person_controller import FirstPersonController
 
 
 class ArrowKeyController(FirstPersonController):
-    def __init__(self, network_manager=None, **kwargs):
+    def __init__(self, network_manager: Optional[Any] = None, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self.network_manager = network_manager
-        self.last_position = self.position
+        self.network_manager: Optional[Any] = network_manager
+        self.last_position: Any = self.position
     
-    def update(self):
+    def update(self) -> None:
         speed = self.speed * time.dt
         moved = False
         
