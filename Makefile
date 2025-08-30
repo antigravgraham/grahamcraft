@@ -20,5 +20,62 @@ run-entry:
 server-entry:
 	uv run grahamcraft-server
 
+# Development and Testing
+test-install:
+	uv sync --extra test
+
+dev-full-install:
+	uv sync --extra dev
+
+# Testing
+test:
+	uv run pytest
+
+test-verbose:
+	uv run pytest -v
+
+test-coverage:
+	uv run pytest --cov=src/grahamcraft --cov-report=html --cov-report=term
+
+test-unit:
+	uv run pytest -m "unit" -v
+
+test-integration:
+	uv run pytest -m "integration" -v
+
+test-fast:
+	uv run pytest -m "not slow" -v
+
+# Code Quality
+lint:
+	uv run flake8 src tests
+
+format:
+	uv run black src tests
+	uv run isort src tests
+
+format-check:
+	uv run black --check src tests
+	uv run isort --check-only src tests
+
+type-check:
+	uv run mypy src
+
+# Clean up
+clean:
+	rm -rf build/
+	rm -rf dist/
+	rm -rf *.egg-info/
+	rm -rf htmlcov/
+	rm -rf .coverage
+	rm -rf .pytest_cache/
+	find . -type d -name __pycache__ -exec rm -rf {} +
+	find . -type f -name "*.pyc" -delete
+
+# Development workflow
+check: format-check lint type-check test
+
+fix: format lint
+
 
 
