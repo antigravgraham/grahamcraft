@@ -62,6 +62,13 @@ class NetworkManager:
                 self.remote_players[player_id].position = tuple(position)
 
         @self.sio.event
+        def player_teleported(data: Dict[str, Any]) -> None:
+            player_id = data["player_id"]
+            position = data["position"]
+            if player_id in self.remote_players:
+                self.remote_players[player_id].position = tuple(position)
+
+        @self.sio.event
         def voxel_placed(data: Dict[str, Any]) -> None:
             position = tuple(data["position"])
             self.logger.info(f"voxel placed: {position}")
@@ -105,6 +112,10 @@ class NetworkManager:
     def disconnect_from_server(self) -> None:
         if self.connected:
             self.sio.disconnect()
+
+    def send_teleport(self, position: Tuple[float, float, float]) -> None:
+        if self.connected:
+            self.sio.emit("player_teleport", {"position": list(position)})
 
     def send_player_move(self, position: Tuple[float, float, float]) -> None:
         if self.connected:

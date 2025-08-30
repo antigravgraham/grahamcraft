@@ -63,6 +63,10 @@ def input(key: str) -> None:
             network_manager.send_world_save("multiplayer_world.json")
         else:
             save_world(voxels, player, app)
+    if key == "t":
+        if network_manager.connected:
+            network_manager.send_teleport(player.position)
+
 
     if key == "l":
         if network_manager.connected:
