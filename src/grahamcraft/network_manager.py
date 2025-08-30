@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import socketio
 from ursina import Color, Vec3, destroy
@@ -9,7 +9,7 @@ from .voxel import Voxel
 
 
 class NetworkManager:
-    def __init__(self, server_url: str = "http://192.168.1.243:5001") -> None:
+    def __init__(self, server_url: str = "http://192.168.1.243:5001", position_setter: Optional[Callable[[Vec3], None]] = None) -> None:
         self.sio: socketio.Client = socketio.Client()
         self.server_url: str = server_url
         self.connected: bool = False
@@ -18,10 +18,14 @@ class NetworkManager:
         self.voxels: List[Voxel] = []
         self.app: Any = None
         self.player: Any = None
+        self.position_setter: Optional[Callable[[Vec3], None]] = position_setter
 
         # Get a logger instance
         self.logger: logging.Logger = logging.getLogger(__name__)
         self.setup_events()
+
+    def set_position_setter(self, position_setter: Callable[[Vec3], None]) -> None:
+        self.position_setter = position_setter
 
     def setup_events(self) -> None:
         @self.sio.event
@@ -62,6 +66,12 @@ class NetworkManager:
                 self.remote_players[player_id].position = tuple(position)
 
         @self.sio.event
+        def player_teleported(data: Dict[str, Any]) -> None:
+            position = data["position"]
+            if self.position_setter:
+                self.position_setter(position)
+
+        @self.sio.event
         def voxel_placed(data: Dict[str, Any]) -> None:
             position = tuple(data["position"])
             self.logger.info(f"voxel placed: {position}")
@@ -78,6 +88,7 @@ class NetworkManager:
                     if voxel.position == position:
                         self.voxels.pop(idx)
                         self.logger.info(f"voxel popped: {position}")
+                        destroy(voxel)
                 except Exception as e:
                     self.logger.warning(f"Exception while destroying voxel: {e}")
 
@@ -88,9 +99,7 @@ class NetworkManager:
 
         @self.sio.event
         def gravity_changed(data: Dict[str, Any]) -> None:
-            if self.app and self.player:
-                self.app.has_gravity = data["has_gravity"]
-                self.player.gravity = 1 if data["has_gravity"] else 0
+            self.player.gravity = 1 if data["has_gravity"] else 0
 
     def connect_to_server(self) -> bool:
         try:
@@ -105,6 +114,10 @@ class NetworkManager:
         if self.connected:
             self.sio.disconnect()
 
+    def send_teleport(self, position: Tuple[float, float, float]) -> None:
+        if self.connected:
+            self.sio.emit("player_teleport", {"position": list(position)})
+
     def send_player_move(self, position: Tuple[float, float, float]) -> None:
         if self.connected:
             self.sio.emit("player_move", {"position": list(position)})
@@ -115,9 +128,9 @@ class NetworkManager:
                 "voxel_place", {"position": list(position), "color": [color.r, color.g, color.b]}
             )
 
-    def send_voxel_destroy(self, position: List[float]) -> None:
+    def send_voxel_destroy(self, position: Tuple[float, float, float]) -> None:
         if self.connected:
-            self.sio.emit("voxel_destroy", {"position": position})
+            self.sio.emit("voxel_destroy", {"position": list(position)})
 
     def send_world_save(self, filename: str = "multiplayer_world.json") -> None:
         if self.connected:

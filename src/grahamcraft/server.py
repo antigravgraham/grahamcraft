@@ -78,7 +78,16 @@ def handle_voxel_place(data: Dict[str, Any]) -> None:
     }
     game_state["voxels"].append(voxel_data)
     emit("voxel_placed", voxel_data, broadcast=True)
-    logger.info("voxel placed: ", str(voxel_data))
+    logger.info(f"voxel placed: {json.dumps(voxel_data)}")
+
+@socketio.on("player_teleport")
+def handle_player_teleport(data: Dict[str, Any]) -> None:
+    emit(
+        "player_teleported",
+        {"position": data["position"]},
+        broadcast=True,
+        include_self=False,
+    )
 
 
 @socketio.on("voxel_destroy")

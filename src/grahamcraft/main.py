@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 
 from ursina import (
     Ursina,
@@ -8,7 +8,6 @@ from ursina import (
     raycast,
     Vec3
 )
-
 from random import randint
 from .arrow_key_controller import ArrowKeyController
 from .network_manager import NetworkManager
@@ -16,80 +15,81 @@ from .voxel import Voxel
 from .world_manager import load_world, save_world
 
 
-# application.blender_paths["default"] = "/Applications/Blender.app/Contents/MacOS/Blender"
+class Game:
+    def __init__(self):
+        self.app = Ursina()
+        self.network_manager = NetworkManager()
+        start_pos = Vec3(randint(10, 19), randint(10, 100), randint(10, 19))
+        self.player = ArrowKeyController(initial_position=start_pos, gravity=1, network_manager=self.network_manager)
+        self.network_manager.set_position_setter(self.player.set_player_position)
+        self.player.cursor.scale = 0.00025
+        self.has_gravity = True
+        self.voxels: List[Voxel] = []
+        
+    def create_world(self) -> None:
+        for z in range(20):
+            for x in range(20):
+                voxel = Voxel(position=(x, 0, z))
+                self.voxels.append(voxel)
 
-app = Ursina()
-network_manager = NetworkManager()
-start_pos = Vec3(randint(10, 20), randint(10, 20), randint(10, 20))
-player = ArrowKeyController(initial_position=start_pos, gravity=1, network_manager=network_manager)
-player.cursor.scale = 0.00025
-app.has_gravity = True
-voxels: List[Voxel] = []
+    def run(self) -> None:
+        self.network_manager.set_game_objects(self.app, self.player, self.voxels)
+        connected = self.network_manager.connect_to_server()
+        if not connected:
+            print("Failed to connect to multiplayer server. Starting in offline mode.")
+            self.create_world()
+        self.app.run()
 
+game = Game()
 
-def input(key: str) -> None:
+def main() -> None:
+    game.run()
+
+def input(key, is_raw:bool=False) -> None:
     if key == "left mouse down":
         hit_info = raycast(camera.world_position, camera.forward, distance=5)
         if hit_info.hit:
             new_position = hit_info.entity.position + hit_info.normal
             new_voxel = Voxel(position=new_position)
-            voxels.append(new_voxel)
-            network_manager.send_voxel_place(
+            game.voxels.append(new_voxel)
+            game.network_manager.send_voxel_place(
                 (new_position.x, new_position.y, new_position.z), new_voxel.color
             )
     if key == "right mouse down" and mouse.hovered_entity:
-        if mouse.hovered_entity in voxels:
+        if mouse.hovered_entity in game.voxels:
             position = mouse.hovered_entity.position
-            voxels.remove(mouse.hovered_entity)
-            network_manager.send_voxel_destroy(list(position))
+            game.voxels.remove(mouse.hovered_entity)
+            game.network_manager.send_voxel_destroy(position)
         destroy(mouse.hovered_entity)
     if key == "escape":
-        network_manager.disconnect_from_server()
+        game.network_manager.disconnect_from_server()
         quit()
     if key == "r":
-        (x, y, z) = player.position
-        player.position = (x, y + 0.55, z)
-        network_manager.send_player_move(player.position)
+        (x, y, z) = game.player.position
+        game.player.position = (x, y + 0.55, z)
+        game.network_manager.send_player_move(game.player.position)
     if key == "f":
-        (x, y, z) = player.position
-        player.position = (x, y - 0.55, z)
-        network_manager.send_player_move(player.position)
+        (x, y, z) = game.player.position
+        game.player.position = (x, y - 0.55, z)
+        game.network_manager.send_player_move(game.player.position)
 
     if key == "g":
-        network_manager.send_gravity_toggle()
+        game.network_manager.send_gravity_toggle()
 
     if key == "k":
-        if network_manager.connected:
-            network_manager.send_world_save("multiplayer_world.json")
+        if game.network_manager.connected:
+            game.network_manager.send_world_save("multiplayer_world.json")
         else:
-            save_world(voxels, player, app)
+            save_world(game.voxels, game.player, game.app)
+    if key == "t":
+        if game.network_manager.connected:
+            game.network_manager.send_teleport(game.player.position)
 
     if key == "l":
-        if network_manager.connected:
-            network_manager.send_world_load("multiplayer_world.json")
+        if game.network_manager.connected:
+            game.network_manager.send_world_load("multiplayer_world.json")
         else:
-            load_world(voxels, player, app)
-
-
-def create_world() -> None:
-    for z in range(20):
-        for x in range(20):
-            voxel = Voxel(position=(x, 0, z))
-            voxels.append(voxel)
-
-
-def main() -> None:
-    network_manager.set_game_objects(app, player, voxels)
-
-    connected = network_manager.connect_to_server()
-
-    if not connected:
-        print("Failed to connect to multiplayer server. Starting in offline mode.")
-        create_world()
-
-    # character = Character(position=(10, 1, 10))
-    app.run()
-
+            load_world(game.voxels, game.player, game.app)
 
 if __name__ == "__main__":
     main()
