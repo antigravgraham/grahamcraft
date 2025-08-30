@@ -43,7 +43,7 @@ def input(key):
         if mouse.hovered_entity in voxels:
             position = mouse.hovered_entity.position
             voxels.remove(mouse.hovered_entity)
-            network_manager.send_voxel_destroy(position)
+            network_manager.send_voxel_destroy(list(position))
         destroy(mouse.hovered_entity)
     if key == "escape":
         network_manager.disconnect_from_server()
@@ -72,6 +72,11 @@ def input(key):
         else:
             load_world(voxels, player, app)
 
+def create_world():
+    for z in range(20):
+        for x in range(20):
+            voxel = Voxel(position=(x, 0, z))
+            voxels.append(voxel)
 
 def main():
     network_manager.set_game_objects(app, player, voxels)
@@ -80,10 +85,7 @@ def main():
     
     if not connected:
         print("Failed to connect to multiplayer server. Starting in offline mode.")
-        # for z in range(20):
-        #     for x in range(20):
-        #         voxel = Voxel(position=(x, 0, z))
-        #         voxels.append(voxel)
+        create_world()
 
     character = Character(position=(10, 1, 10))
     app.run()

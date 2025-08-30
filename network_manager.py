@@ -4,6 +4,7 @@ from typing import Union, Tuple, Any
 from ursina import destroy, Vec3, Color
 from voxel import Voxel
 from multiplayer_player import MultiplayerPlayer
+import logging
 
 class NetworkManager:
     def __init__(self, server_url="http://192.168.1.243:5001"):
@@ -15,28 +16,31 @@ class NetworkManager:
         self.voxels = []
         self.app = None
         self.player = None
-        
+
+# Get a logger instance
+        self.logger = logging.getLogger(__name__)
         self.setup_events()
     
     def setup_events(self):
         @self.sio.event
         def connect():
-            print("Connected to server")
+            self.logger.info("Connected to server")
             self.connected = True
         
         @self.sio.event
         def disconnect():
-            print("Disconnected from server")
+            self.logger.info("Disconnected from server")
             self.connected = False
         
         @self.sio.event
         def game_state(data):
-            print("Received initial game state:")
+            self.logger.info("Received initial game state:")
             print(data)
             self.load_game_state(data)
         
         @self.sio.event
         def player_joined(data):
+            self.logger.info("player_joined")
             player_id = data["player_id"]
             player_data = data["player"]
             if player_id != self.player_id:
@@ -44,6 +48,7 @@ class NetworkManager:
         
         @self.sio.event
         def player_left(data):
+            self.logger.info("player left")
             player_id = data["player_id"]
             self.remove_remote_player(player_id)
         
@@ -57,6 +62,7 @@ class NetworkManager:
         @self.sio.event
         def voxel_placed(data):
             position = tuple(data["position"])
+            self.logger.info(f"voxel placed: {position}")
             color = data["color"]
             voxel = Voxel(position=position)
             voxel.color = Color(color[0],color[1],color[2],1)
@@ -64,16 +70,16 @@ class NetworkManager:
         
         @self.sio.event
         def voxel_destroyed(data):
-            position = tuple(data["position"])
-            for voxel in self.voxels[:]:
+            position = Vec3(tuple(data["position"]))
+            for idx, voxel in enumerate(self.voxels):
                 try:
-                    if tuple(voxel.position) == position:
-                        self.voxels.remove(voxel)
-                        destroy(voxel)
-                        break
+                    if voxel.position == position:
+                            self.voxels.pop(idx)
+                            # destroy(voxel)
+                            self.logger.info(f"voxel popped: {position}")
                 except:
-                    # Voxel already destroyed, remove from list
-                    self.voxels.remove(voxel)
+                    self.logger.info("already destroyed")
+
         
         @self.sio.event
         def world_loaded(data):
@@ -110,9 +116,9 @@ class NetworkManager:
                 "color": [color.r, color.g, color.b]
             })
     
-    def send_voxel_destroy(self, position):
+    def send_voxel_destroy(self, position: list[int]):
         if self.connected:
-            self.sio.emit('voxel_destroy', {"position": list(position)})
+            self.sio.emit('voxel_destroy', {"position": position})
     
     def send_world_save(self, filename="multiplayer_world.json"):
         if self.connected:
@@ -141,10 +147,6 @@ class NetworkManager:
             voxel = Voxel(position=position)
             voxel.color = Color(color[0],color[1],color[2],1)
             self.voxels.append(voxel)
-            # if isinstance(color, list) and len(color) >= 3:
-            #     voxel.color = tuple(color[:3])
-            # elif hasattr(color, '__iter__') and not isinstance(color, str):
-            #     voxel.color = color
             self.voxels.append(voxel)
         
         for player_id, player_data in game_state.get("players", {}).items():

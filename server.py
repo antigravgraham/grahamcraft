@@ -1,15 +1,23 @@
-import random
+# import random
 import signal
 import sys
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
 import json
 from datetime import datetime
-from ursina import color
-from voxel import Voxel
+from ursina import color, Vec3
+# from voxel import Voxel
+import logging
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+
+# Basic configuration (sets up a StreamHandler to console by default)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Get a logger instance
+logger = logging.getLogger(__name__)
 
 game_state = {"players": {}, "voxels": [], "world_settings": {"has_gravity": True}}
 
@@ -66,15 +74,17 @@ def handle_voxel_place(data):
     }
     game_state["voxels"].append(voxel_data)
     emit("voxel_placed", voxel_data, broadcast=True)
+    logger.info("voxel placed: ", str(voxel_data))
 
 
 @socketio.on("voxel_destroy")
 def handle_voxel_destroy(data):
-    position = data["position"]
+    position = Vec3(tuple(data["position"]))
     game_state["voxels"] = [
         v for v in game_state["voxels"] if v["position"] != position
     ]
-    emit("voxel_destroyed", {"position": position}, broadcast=True)
+    emit("voxel_destroyed", {"position": list(tuple(position))}, broadcast=True)
+    logger.info(f"voxel destroyed")
 
 
 @socketio.on("world_save")
