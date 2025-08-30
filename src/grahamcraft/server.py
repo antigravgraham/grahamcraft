@@ -6,11 +6,12 @@ import logging
 import signal
 import sys
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
 from ursina import Vec3, color
+from random import randint
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -35,8 +36,8 @@ def handle_connect() -> None:
     print(f"Client connected: {request.sid}")
 
     player_id = request.sid
-    # game_state["players"][player_id] = {"position": [10, 1, 10], "color": "red"}
-    game_state["players"][player_id] = {"position": [10, 1, 10], "color": [128, 0, 0, 1]}
+    player_position = [randint(10, 20), randint(10, 20), randint(10, 20)]
+    game_state["players"][player_id] = {"position": player_position, "color": [128, 0, 0, 1]}
 
     emit("game_state", game_state)
     emit(
@@ -134,9 +135,7 @@ def main() -> None:
     print("Starting multiplayer server on http://localhost:5000")
     for z in range(20):
         for x in range(20):
-            # voxel = Voxel(position=(x, 0, z))
             rcolor = color.random_color()
-
             voxel = {
                 "position": (x, 0, z),
                 "color": [rcolor.r, rcolor.g, rcolor.b, rcolor.brightness],

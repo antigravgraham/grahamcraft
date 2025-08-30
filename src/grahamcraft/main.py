@@ -2,31 +2,28 @@ from typing import List
 
 from ursina import (
     Ursina,
-    application,
     camera,
-    color,
     destroy,
     mouse,
     raycast,
-    scene,
+    Vec3
 )
 
+from random import randint
 from .arrow_key_controller import ArrowKeyController
-from .character import Character
 from .network_manager import NetworkManager
 from .voxel import Voxel
 from .world_manager import load_world, save_world
 
+
+# application.blender_paths["default"] = "/Applications/Blender.app/Contents/MacOS/Blender"
+
 app = Ursina()
-
-application.blender_paths["default"] = "/Applications/Blender.app/Contents/MacOS/Blender"
-
-
 network_manager = NetworkManager()
-player = ArrowKeyController(gravity=1, network_manager=network_manager)
+start_pos = Vec3(randint(10, 20), randint(10, 20), randint(10, 20))
+player = ArrowKeyController(initial_position=start_pos, gravity=1, network_manager=network_manager)
 player.cursor.scale = 0.00025
 app.has_gravity = True
-
 voxels: List[Voxel] = []
 
 
@@ -90,7 +87,7 @@ def main() -> None:
         print("Failed to connect to multiplayer server. Starting in offline mode.")
         create_world()
 
-    character = Character(position=(10, 1, 10))
+    # character = Character(position=(10, 1, 10))
     app.run()
 
 
