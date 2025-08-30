@@ -130,7 +130,7 @@ class NetworkManager:
 
     def send_voxel_destroy(self, position: Tuple[float, float, float]) -> None:
         if self.connected:
-            self.sio.emit("voxel_destroy", {"position": position})
+            self.sio.emit("voxel_destroy", {"position": list(position)})
 
     def send_world_save(self, filename: str = "multiplayer_world.json") -> None:
         if self.connected:
