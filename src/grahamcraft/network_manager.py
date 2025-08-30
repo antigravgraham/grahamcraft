@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import socketio
 from ursina import Color, Vec3, destroy
@@ -9,7 +9,7 @@ from .voxel import Voxel
 
 
 class NetworkManager:
-    def __init__(self, server_url: str = "http://192.168.1.243:5001") -> None:
+    def __init__(self, server_url: str = "http://192.168.1.243:5001", position_setter: Optional[Callable[[Vec3], None]] = None) -> None:
         self.sio: socketio.Client = socketio.Client()
         self.server_url: str = server_url
         self.connected: bool = False
@@ -18,10 +18,14 @@ class NetworkManager:
         self.voxels: List[Voxel] = []
         self.app: Any = None
         self.player: Any = None
+        self.position_setter: Optional[Callable[[Vec3], None]] = position_setter
 
         # Get a logger instance
         self.logger: logging.Logger = logging.getLogger(__name__)
         self.setup_events()
+
+    def set_position_setter(self, position_setter: Callable[[Vec3], None]) -> None:
+        self.position_setter = position_setter
 
     def setup_events(self) -> None:
         @self.sio.event
@@ -63,10 +67,9 @@ class NetworkManager:
 
         @self.sio.event
         def player_teleported(data: Dict[str, Any]) -> None:
-            player_id = data["player_id"]
             position = data["position"]
-            if player_id in self.remote_players:
-                self.remote_players[player_id].position = tuple(position)
+            if self.position_setter:
+                self.position_setter(position)
 
         @self.sio.event
         def voxel_placed(data: Dict[str, Any]) -> None:

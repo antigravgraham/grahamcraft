@@ -22,6 +22,7 @@ app = Ursina()
 network_manager = NetworkManager()
 start_pos = Vec3(randint(10, 20), randint(10, 20), randint(10, 20))
 player = ArrowKeyController(initial_position=start_pos, gravity=1, network_manager=network_manager)
+network_manager.set_position_setter(player.set_player_position)
 player.cursor.scale = 0.00025
 app.has_gravity = True
 voxels: List[Voxel] = []

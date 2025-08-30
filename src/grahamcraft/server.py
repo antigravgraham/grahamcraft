@@ -80,6 +80,15 @@ def handle_voxel_place(data: Dict[str, Any]) -> None:
     emit("voxel_placed", voxel_data, broadcast=True)
     logger.info(f"voxel placed: {json.dumps(voxel_data)}")
 
+@socketio.on("player_teleport")
+def handle_player_teleport(data: Dict[str, Any]) -> None:
+    emit(
+        "player_teleported",
+        {"position": data["position"]},
+        broadcast=True,
+        include_self=False,
+    )
+
 
 @socketio.on("voxel_destroy")
 def handle_voxel_destroy(data: Dict[str, Any]) -> None:

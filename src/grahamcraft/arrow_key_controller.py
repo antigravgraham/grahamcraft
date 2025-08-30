@@ -11,6 +11,9 @@ class ArrowKeyController(FirstPersonController):
         self.position = initial_position
         self.last_position = initial_position
 
+    def set_player_position(self, position: Vec3) -> None:
+        self.position = position
+    
     def update(self) -> None:
         speed = self.speed * time.dt
         moved = False
