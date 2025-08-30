@@ -1,0 +1,21 @@
+{
+  "include": ["src", "tests"],
+  "exclude": ["**/.venv", "**/node_modules", "**/__pycache__"],
+  "pythonVersion": "3.12",
+  "reportMissingTypeStubs": "warning",
+  "reportAttributeAccessIssue": "warning",
+  "reportIndexIssue": "warning",
+  "reportArgumentType": "warning",
+  "reportPossiblyUnboundVariable": "warning",
+  "reportOptionalMemberAccess": "warning",
+  "reportOptionalSubscript": "warning",
+  "reportOptionalOperand": "warning",
+  "reportUntypedFunctionDecorator": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownVariableType": "none",
+  "strictListInference": false,
+  "strictDictionaryInference": false,
+  "strictSetInference": false,
+  "strictParameterNoneValue": false
+}

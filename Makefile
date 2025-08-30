@@ -48,7 +48,7 @@ test-fast:
 
 # Code Quality
 lint:
-	uv run flake8 src tests
+	uv run pyright src tests
 
 format:
 	uv run black src tests
