@@ -99,9 +99,7 @@ class NetworkManager:
 
         @self.sio.event
         def gravity_changed(data: Dict[str, Any]) -> None:
-            if self.app and self.player:
-                self.app.has_gravity = data["has_gravity"]
-                self.player.gravity = 1 if data["has_gravity"] else 0
+            self.player.gravity = 1 if data["has_gravity"] else 0
 
     def connect_to_server(self) -> bool:
         try:
@@ -130,7 +128,7 @@ class NetworkManager:
                 "voxel_place", {"position": list(position), "color": [color.r, color.g, color.b]}
             )
 
-    def send_voxel_destroy(self, position: List[float]) -> None:
+    def send_voxel_destroy(self, position: Tuple[float, float, float]) -> None:
         if self.connected:
             self.sio.emit("voxel_destroy", {"position": position})
 
