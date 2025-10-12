@@ -102,3 +102,24 @@ src/grahamcraft/
 - Server maintains centralized game state
 - Client-side prediction not implemented (server authoritative)
 - Entry points defined for easy command-line usage
+
+## Coding Guidelines
+
+- write unit tests for new code
+- run the tests to make sure everything works
+- keep functions small - 20 lines max
+- add doc strings for all functions including the arguments and return values
+- include types for all function arguments and return values
+- keep test coverage above 75 %
+- make sure the docker image builds
+- use the Makefile targets to run all project actions
+
+## Architecture Guidelines
+- prefer composition over inheritance
+- prefer pure functional style over object oriented style
+- avoid mutable state where possible
+- avoid side effecting code where possible
+- prefer loose coupling of components
+- DRY - don't repeat yourself. If a coding pattern is repeated three times or
+  more, refactor to remove the repetition
+

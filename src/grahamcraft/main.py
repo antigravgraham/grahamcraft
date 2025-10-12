@@ -74,6 +74,8 @@ def input(key, is_raw:bool=False) -> None:
         game.network_manager.send_player_move(game.player.position)
 
     if key == "g":
+        game.has_gravity = not game.has_gravity
+        game.player.gravity = 1 if game.has_gravity else 0
         game.network_manager.send_gravity_toggle()
 
     if key == "k":
