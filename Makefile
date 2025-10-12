@@ -29,21 +29,27 @@ dev-full-install:
 
 # Testing
 test:
+	uv sync --extra test
 	uv run pytest
 
 test-verbose:
+	uv sync --extra test
 	uv run pytest -v
 
 test-coverage:
+	uv sync --extra test
 	uv run pytest --cov=src/grahamcraft --cov-report=html --cov-report=term
 
 test-unit:
+	uv sync --extra test
 	uv run pytest -m "unit" -v
 
 test-integration:
+	uv sync --extra test
 	uv run pytest -m "integration" -v
 
 test-fast:
+	uv sync --extra test
 	uv run pytest -m "not slow" -v
 
 # Code Quality
